@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ebebeb;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 30px 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        .drop-zone {
+            border: 2px dashed #ccc;
+            padding: 30px;
+            text-align: center;
+            background-color: #f2f2f2;
+            color: #888;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .drop-zone.highlight {
+            border-color: #00cc66;
+        }
+
+        #image-preview {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 30px auto;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .custom-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #800080;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-radius: 5px;
+        }
+
+        .custom-button:hover {
+            background-color: #00b359;
+        }
+
+        .convert-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #800080;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .convert-button:hover {
+            background-color: #800080;
+        }
+
+        .download-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #800080;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: none;
+            border-radius: 5px;
+        }
+
+        .download-button:hover {
+            background-color: #00b359;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Converter</h1>
+        <div class="drop-zone" id="drop-zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)">
+            <p>Drag and drop an image file here</p>
+            <p>or</p>
+            <label for="image-input" class="custom-button">Choose File</label>
+            <input type="file" id="image-input" accept="image/*" class="file-input" onchange="handleFiles(event)">
+        </div>
+        <canvas id="canvas" style="display: none;"></canvas>
+        <br>
+        <div style="text-align: center;">
+            <button class="convert-button" onclick="convertTo('jpeg')">Convert to JPG</button>
+            <button class="convert-button" onclick="convertTo('png')">Convert to PNG</button>
+        </div>
+        <br>
+        <img id="image-preview">
+        <br>
+        <a id="download-link" style="display: none;" download="converted_image">
+            <button class="download-button">Download Image</button>
+        </a>
+    </div>
+    <script>
+        function handleFiles(event) {
+            var fileInput = document.getElementById('image-input');
+            var files = event.target.files || event.dataTransfer.files;
+            fileInput.files = files;
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            handleFiles(event);
+            document.getElementById('drop-zone').classList.remove('highlight');
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+        }
+
+        function handleDragEnter(event) {
+            event.preventDefault();
+            document.getElementById('drop-zone').classList.add('highlight');
+        }
+
+        function handleDragLeave(event) {
+            event.preventDefault();
+            document.getElementById('drop-zone').classList.remove('highlight');
+        }
+
+        function convertTo(format) {
+            var canvas = document.getElementById('canvas');
+            var imagePreview = document.getElementById('image-preview');
+            var fileInput = document.getElementById('image-input');
+            var downloadLink = document.getElementById('download-link');
+            var file = fileInput.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var image = new Image();
+                image.src = e.target.result;
+
+                image.onload = function () {
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    var context = canvas.getContext('2d');
+                    context.drawImage(image, 0, 0);
+
+                    var dataUrl;
+                    var fileName;
+
+                    if (format === 'jpeg') {
+                        dataUrl = canvas.toDataURL('image/jpeg');
+                        fileName = 'converted_image.jpg';
+                    } else if (format === 'png') {
+                        dataUrl = canvas.toDataURL('image/png');
+                        fileName = 'converted_image.png';
+                    }
+
+                    imagePreview.src = dataUrl;
+
+                    downloadLink.href = dataUrl;
+                    downloadLink.download = fileName;
+                    downloadLink.style.display = 'block';
+                    document.getElementsByClassName('download-button')[0].style.display = 'block';
+                };
+            };
+
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
